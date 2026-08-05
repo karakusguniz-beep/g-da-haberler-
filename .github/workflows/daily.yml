@@ -1,0 +1,35 @@
+name: Gunluk Gida Sinyal Raporu
+
+on:
+  schedule:
+    # Her gün Türkiye saatiyle 08:00'de otomatik çalışır (UTC 05:00)
+    - cron: '0 5 * * *'
+  workflow_dispatch: # Manuel çalıştırma butonunu aktif eder
+
+jobs:
+  run-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu Cek
+        uses: actions/checkout@v3
+
+      - name: Python Kur
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Kutuphaneleri Yukle
+        run: pip install google-genai
+
+      - name: Raporu Uret
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python daily_food_signal_agent_gemini.py
+
+      - name: Raporu Kaydet
+        run: |
+          git config --global user.name "Sinyal Botu"
+          git config --global user.email "bot@github.com"
+          git add gunluk_raporlar/
+          git commit -m "Gunluk rapor eklendi: $(date +'%Y-%m-%d')" || exit 0
+          git push
