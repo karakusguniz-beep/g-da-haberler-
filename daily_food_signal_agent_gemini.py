@@ -5,7 +5,6 @@ from pathlib import Path
 
 try:
     from google import genai
-    from google.genai import types
 except ImportError:
     sys.exit("Hata: 'google-genai' paketi kurulu degil.")
 
@@ -32,7 +31,7 @@ def build_prompt() -> str:
     focus_list = "\n".join(f"{i+1}. {item}" for i, item in enumerate(SECTOR_FOCUS))
     markets = ", ".join(EXPORT_MARKETS)
     return f"""Turkiye'deki gida sektorunu ilgilendiren su alanlarda son {LOOKBACK_DAYS} gun
-icindeki guncel gelismeleri web'de tara ve ozetle:
+icindeki guncel gelismeleri tara ve ozetle:
 
 {focus_list}
 
@@ -55,15 +54,9 @@ def run_agent() -> str:
 
     client = genai.Client(api_key=api_key)
 
-    # Grounding (Google Search) konfigürasyonu
-    config = types.GenerateContentConfig(
-        tools=[{"google_search": {}}]
-    )
-
     response = client.models.generate_content(
         model=MODEL,
         contents=build_prompt(),
-        config=config,
     )
 
     return (response.text or "").strip()
@@ -79,7 +72,7 @@ def save_report(text: str) -> Path:
 
 
 def main():
-    print("Sinyal taramasi baslatiliyor (Gemini)...")
+    print("Sinyal taramasi baslatiliyor...")
     report_text = run_agent()
     out_path = save_report(report_text)
     print(f"Rapor basariyla kaydedildi: {out_path.resolve()}")
