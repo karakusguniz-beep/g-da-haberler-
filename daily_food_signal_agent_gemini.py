@@ -9,6 +9,10 @@ try:
 except ImportError:
     sys.exit("Hata: 'google-genai' paketi kurulu degil.")
 
+# ---------------------------------------------------------------------------
+# SEKTÖREL ODAK ALANLARI VE HEDEF PAZARLAR
+# ---------------------------------------------------------------------------
+
 SECTOR_FOCUS = [
     "gida mevzuati ve yonetmelik degisiklikleri (Resmi Gazete, Tarim ve Orman Bakanligi)",
     "yeni gida uretim tesisi yatirimlari, IPARD/tesvik haberleri",
@@ -18,8 +22,10 @@ SECTOR_FOCUS = [
 
 EXPORT_MARKETS = ["Avrupa Birligi", "Orta Dogu", "Korfez Ulkeleri"]
 OUTPUT_DIR = Path("./gunluk_raporlar")
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-2.0-flash"  # Guncel ve stabil Gemini modeli
 LOOKBACK_DAYS = 7
+
+# ---------------------------------------------------------------------------
 
 
 def build_prompt() -> str:
@@ -45,14 +51,13 @@ Eger bir kategoride yeni bir sey bulamazsan, o kategoriyi 'bu donemde yeni gelis
 def run_agent() -> str:
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        sys.exit("Hata: GEMINI_API_KEY ortami bulunamadi.")
+        sys.exit("Hata: GEMINI_API_KEY ortam degiskeni tanimli degil.")
 
     client = genai.Client(api_key=api_key)
-    
-    # Grounding google search tool
-    config = types.GenerateContentConfig(
-        tools=[{"google_search": {}}]
-    )
+
+    # Google Arama (Grounding) aracini etkinlestir
+    grounding_tool = types.Tool(google_search=types.GoogleSearch())
+    config = types.GenerateContentConfig(tools=[grounding_tool])
 
     response = client.models.generate_content(
         model=MODEL,
@@ -73,10 +78,10 @@ def save_report(text: str) -> Path:
 
 
 def main():
-    print("Sinyal taramasi baslatiliyor...")
+    print("Sinyal taramasi baslatiliyor (Gemini)...")
     report_text = run_agent()
     out_path = save_report(report_text)
-    print(f"Rapor kaydedildi: {out_path.resolve()}")
+    print(f"Rapor basariyla kaydedildi: {out_path.resolve()}")
 
 
 if __name__ == "__main__":
