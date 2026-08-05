@@ -22,7 +22,7 @@ SECTOR_FOCUS = [
 
 EXPORT_MARKETS = ["Avrupa Birligi", "Orta Dogu", "Korfez Ulkeleri"]
 OUTPUT_DIR = Path("./gunluk_raporlar")
-MODEL = "gemini-2.0-flash"  # Guncel ve stabil Gemini modeli
+MODEL = "gemini-2.0-flash"
 LOOKBACK_DAYS = 7
 
 # ---------------------------------------------------------------------------
@@ -55,9 +55,10 @@ def run_agent() -> str:
 
     client = genai.Client(api_key=api_key)
 
-    # Google Arama (Grounding) aracini etkinlestir
-    grounding_tool = types.Tool(google_search=types.GoogleSearch())
-    config = types.GenerateContentConfig(tools=[grounding_tool])
+    # Grounding (Google Search) konfigürasyonu
+    config = types.GenerateContentConfig(
+        tools=[{"google_search": {}}]
+    )
 
     response = client.models.generate_content(
         model=MODEL,
