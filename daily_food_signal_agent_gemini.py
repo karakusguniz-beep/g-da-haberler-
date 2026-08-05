@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-"""
 Günlük Gıda Sektörü Sinyal Ajanı — Gemini API sürümü
 ------------------------------------------------------
 Claude API yerine Google Gemini API'sini (Google Search grounding aracıyla
